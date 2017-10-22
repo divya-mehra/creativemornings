@@ -6,11 +6,13 @@ class PeopleSpider(scrapy.Spider):
     name = "people"
 
     def start_requests(self):
-        pageids = list(range(1, 3267))
+        cityids = list(range(148, 349))
+        pageids = list(range(1, 300))
         urls = []
-        for x in pageids:
-            url = 'https://creativemornings.com/people?active_only=true&faces_only=true&page=' + str(x)
-            urls.append(url)
+        for c in cityids:
+            for x in pageids:
+                url = 'https://creativemornings.com/people?sort_key=recently_updated&city_id=' + str(c) + '&page=' + str(x)
+                urls.append(url)
 
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
@@ -26,7 +28,7 @@ class PeopleSpider(scrapy.Spider):
 class ProfileSpider(scrapy.Spider):
     name = "profile"
 
-    with open("people.json", 'r') as infile:
+    with open("peoplev2.json", 'r') as infile:
         contents = json.load(infile)
 
         start_urls = []
@@ -45,6 +47,7 @@ class ProfileSpider(scrapy.Spider):
             'city': profile.css('div.chapter-box::text').extract_first(),
             'picture': profile.css('img.avatar-bg::attr(src)').extract(),
             'desc': profile.css('div.user-details::text').extract(),
+            'forhire': profile.css('div.user-details span.for-hire::text').extract(),
             'links': profile.css('div.has-sites a::attr(href)').extract(),
             'social': profile.css('a.social-link::attr(href)').extract(), # unsure if grabs 1 
             'bio': profile.css('div.user-bio').extract(),
